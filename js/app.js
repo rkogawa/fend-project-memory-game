@@ -14,6 +14,7 @@ const cards = [
 
 let openCards = [];
 let countMatches = 0;
+let countMoves = 0;
 
 /*
  * Display the cards on the page
@@ -42,6 +43,8 @@ function showCard(evt) {
 }
 
 function chooseCard(evt) {
+    this.updateMoves();
+
     if (openCards.length === 2) {
         for(let i = 0; i < openCards.length; i++) {
             let choosenCard = $(`#${openCards[i]}`)[0];
@@ -51,9 +54,11 @@ function chooseCard(evt) {
     }
 
     showCard(evt);
-    if (openCards.indexOf(evt.target.id) > -1) {
+
+    let indexOpenCard = openCards.indexOf(evt.target.id);
+    if (indexOpenCard > -1) {
         $(evt.target).removeClass('open show');
-        openCards.splice(openCards.indexOf(evt.target.id));
+        openCards.splice(indexOpenCard);
     } else if (openCards.length > 0) {
         let firstChoosenCard = $(`#${openCards[0]}`)[0];
         if (firstChoosenCard.firstChild.className === evt.target.firstChild.className) {
@@ -73,11 +78,41 @@ function chooseCard(evt) {
     }
 }
 
+function showMoves() {
+    $('#countMoves').text(`${countMoves} Moves`);
+    this.updateStarRating();
+}
+
+function updateMoves() {
+    countMoves++;
+    this.showMoves();
+}
+
+function updateStarRating() {
+    let numberOfStars = 3;
+    if (countMoves > 40) {
+        numberOfStars = 1;
+    } else if (countMoves > 20) {
+        numberOfStars = 2;
+    }
+
+    $('#stars').children().each(function() {
+        this.remove();
+    });
+
+    for (let i = 0; i<numberOfStars; i++) {
+        $('#stars').append(`<li><i class="fa fa-star"></i></li>`);
+    }
+}
+
 function startGame() {
     // Clear old rows and columns
     $('#deck').children().each(function() {
         this.remove();
     });
+
+    countMoves = 0;
+    this.showMoves();
 
     // let cards = this.getCards();
     this.shuffle(cards);
@@ -114,20 +149,20 @@ initListeners();
  */
 
 
-         // Get the modal
-         var modal = document.getElementById('myModal');
+// Get the modal
+var modal = document.getElementById('myModal');
          
-         // Get the <span> element that closes the modal
-         var span = document.getElementsByClassName("close")[0];
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
          
-         // When the user clicks on <span> (x), close the modal
-         span.onclick = function() {
-             modal.style.display = "none";
-         }
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+}
          
-         // When the user clicks anywhere outside of the modal, close it
-         window.onclick = function(event) {
-             if (event.target == modal) {
-                 modal.style.display = "none";
-             }
-         }
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
