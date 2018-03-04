@@ -1,20 +1,23 @@
 /*
  * Create a list that holds all of your cards
  */
-const cards = [ 
-        { type: 'fa-diamond' }, { type: 'fa-diamond' },
-        { type: 'fa-paper-plane-o' }, { type: 'fa-paper-plane-o' },
-        { type: 'fa-anchor' }, { type: 'fa-anchor' },
-        { type: 'fa-bolt' }, { type: 'fa-bolt' },
-        { type: 'fa-cube' }, { type: 'fa-cube' },
-        { type: 'fa-leaf' }, { type: 'fa-leaf' },
-        { type: 'fa-bicycle' }, { type: 'fa-bicycle' },
-        { type: 'fa-bomb' }, { type: 'fa-bomb' },
+const cards = [
+    { type: 'fa-diamond' }, { type: 'fa-diamond' },
+    { type: 'fa-paper-plane-o' }, { type: 'fa-paper-plane-o' },
+    { type: 'fa-anchor' }, { type: 'fa-anchor' },
+    { type: 'fa-bolt' }, { type: 'fa-bolt' },
+    { type: 'fa-cube' }, { type: 'fa-cube' },
+    { type: 'fa-leaf' }, { type: 'fa-leaf' },
+    { type: 'fa-bicycle' }, { type: 'fa-bicycle' },
+    { type: 'fa-bomb' }, { type: 'fa-bomb' },
 ];
 
 let openCards = [];
 let countMatches = 0;
 let countMoves = 0;
+let numberOfStars = 3;
+let totalSeconds = 0;
+let timer;
 
 /*
  * Display the cards on the page
@@ -38,23 +41,21 @@ function shuffle(array) {
     return array;
 }
 
-function showCard(evt) {
-    $(evt.target).addClass('open show');
-}
-
-function chooseCard(evt) {
-    this.updateMoves();
-
+function hideOldCards() {
     if (openCards.length === 2) {
-        for(let i = 0; i < openCards.length; i++) {
+        for (let i = 0; i < openCards.length; i++) {
             let choosenCard = $(`#${openCards[i]}`)[0];
             $(choosenCard).removeClass('open show');
         }
         openCards = [];
     }
+}
 
-    showCard(evt);
+function showCard(evt) {
+    $(evt.target).addClass('open show');
+}
 
+function checkCardsMatch(evt) {
     let indexOpenCard = openCards.indexOf(evt.target.id);
     if (indexOpenCard > -1) {
         $(evt.target).removeClass('open show');
@@ -67,15 +68,30 @@ function chooseCard(evt) {
             openCards = [];
             countMatches += 2;
             if (countMatches === cards.length) {
-                $('#myModal')[0].style.display = "block";
+                this.showCongratulationsPopUp();
             }
         } else {
             openCards.push(evt.target.id);
         }
     } else {
         openCards.push(evt.target.id);
-        // $('#myModal')[0].style.display = "block";
     }
+}
+
+function chooseCard(evt) {
+    this.updateMoves();
+
+    this.hideOldCards();
+
+    this.showCard(evt);
+
+    this.checkCardsMatch(evt);
+}
+
+function showCongratulationsPopUp() {
+    $('#myModal')[0].style.display = "block";
+    $('#winningText').text(`With ${countMoves} Moves, ${numberOfStars} Stars and ${totalSeconds} seconds. Uhuuu!!`);
+    clearInterval(timer);
 }
 
 function showMoves() {
@@ -89,48 +105,53 @@ function updateMoves() {
 }
 
 function updateStarRating() {
-    let numberOfStars = 3;
     if (countMoves > 40) {
         numberOfStars = 1;
     } else if (countMoves > 20) {
         numberOfStars = 2;
     }
 
-    $('#stars').children().each(function() {
+    $('#stars').children().each(function () {
         this.remove();
     });
 
-    for (let i = 0; i<numberOfStars; i++) {
+    for (let i = 0; i < numberOfStars; i++) {
         $('#stars').append(`<li><i class="fa fa-star"></i></li>`);
     }
 }
 
 function startGame() {
     // Clear old rows and columns
-    $('#deck').children().each(function() {
+    $('#deck').children().each(function () {
         this.remove();
     });
 
+    startTime = new Date();
+    timer = setInterval(function () {
+        totalSeconds = Math.round((new Date - startTime) / 1000, 0);
+        $('#timer').text(totalSeconds + " Seconds");
+    }, 1000);
+
     countMoves = 0;
+    numberOfStars = 3;
     this.showMoves();
 
-    // let cards = this.getCards();
     this.shuffle(cards);
     // Create nested for to create rows and columns
-    for (let i = 0; i<cards.length; i++) {
+    for (let i = 0; i < cards.length; i++) {
         $('#deck').append(`<li id="card_${i}" class="card"><i class="fa ${cards[i].type}"></i></li>`);
     }
 
     $('#myModal')[0].style.display = "none";
 }
 
-$('.restart').click(function(evt) {
+$('.restart').click(function (evt) {
     startGame();
 });
 
 
 function initListeners() {
-    $('#deck').on('click', '.card', function(evt) {
+    $('#deck').on('click', '.card', function (evt) {
         chooseCard(evt);
     });
 }
@@ -151,17 +172,17 @@ initListeners();
 
 // Get the modal
 var modal = document.getElementById('myModal');
-         
+
 // Get the <span> element that closes the modal
 var span = document.getElementsByClassName("close")[0];
-         
+
 // When the user clicks on <span> (x), close the modal
-span.onclick = function() {
+span.onclick = function () {
     modal.style.display = "none";
 }
-         
+
 // When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
+window.onclick = function (event) {
     if (event.target == modal) {
         modal.style.display = "none";
     }
