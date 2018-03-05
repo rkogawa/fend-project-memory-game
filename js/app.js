@@ -41,6 +41,9 @@ function shuffle(array) {
     return array;
 }
 
+/**
+ * If exists two cards that don't match, close cards.
+ */
 function hideOldCards() {
     if (openCards.length === 2) {
         for (let i = 0; i < openCards.length; i++) {
@@ -51,10 +54,16 @@ function hideOldCards() {
     }
 }
 
+/**
+ * Display the card's symbol
+ */
 function showCard(evt) {
     $(evt.target).addClass('open show');
 }
 
+/**
+ *  Add the card to a *list* of "open" cards and if the list already has another card, check to see if the two cards match.
+ */
 function checkCardsMatch(evt) {
     let indexOpenCard = openCards.indexOf(evt.target.id);
     if (indexOpenCard > -1) {
@@ -78,6 +87,9 @@ function checkCardsMatch(evt) {
     }
 }
 
+/**
+ * Call behaviors when user choose a card.
+ */
 function chooseCard(evt) {
     this.updateMoves();
 
@@ -88,22 +100,34 @@ function chooseCard(evt) {
     this.checkCardsMatch(evt);
 }
 
+/**
+ * If all cards have matched, display the winning message. 
+ */
 function showCongratulationsPopUp() {
     $('#myModal')[0].style.display = "block";
     $('#winningText').text(`With ${countMoves} Moves, ${numberOfStars} Stars and ${totalSeconds} seconds. Uhuuu!!`);
     clearInterval(timer);
 }
 
+/**
+ * Display move counter on the page
+ */
 function showMoves() {
     $('#countMoves').text(`${countMoves} Moves`);
     this.updateStarRating();
 }
 
+/**
+ * Increment the move counter.
+ */
 function updateMoves() {
     countMoves++;
     this.showMoves();
 }
 
+/**
+ * Update star rating according with number of moves.
+ */
 function updateStarRating() {
     if (countMoves > 40) {
         numberOfStars = 1;
@@ -145,45 +169,46 @@ function startGame() {
     $('#myModal')[0].style.display = "none";
 }
 
+/**
+ * Set up restart icon.
+ */
 $('.restart').click(function (evt) {
     startGame();
 });
 
 
+/**
+ * Set up the event listener for a card.
+ */
 function initListeners() {
     $('#deck').on('click', '.card', function (evt) {
         chooseCard(evt);
     });
 }
 
-startGame();
-initListeners();
-/*
- * set up the event listener for a card. If a card is clicked:
- *  - display the card's symbol (put this functionality in another function that you call from this one)
- *  - add the card to a *list* of "open" cards (put this functionality in another function that you call from this one)
- *  - if the list already has another card, check to see if the two cards match
- *    + if the cards do match, lock the cards in the open position (put this functionality in another function that you call from this one)
- *    + if the cards do not match, remove the cards from the list and hide the card's symbol (put this functionality in another function that you call from this one)
- *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
- *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
+/**
+ * Set up the winning modal.
  */
+function initCongratulationsPopup() {
+    // Get the modal
+    var modal = document.getElementById('myModal');
 
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
 
-// Get the modal
-var modal = document.getElementById('myModal');
-
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
-
-// When the user clicks on <span> (x), close the modal
-span.onclick = function () {
-    modal.style.display = "none";
-}
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function (event) {
-    if (event.target == modal) {
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () {
         modal.style.display = "none";
     }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
 }
+
+startGame();
+initListeners();
+initCongratulationsPopup();
