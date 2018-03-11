@@ -13,11 +13,12 @@ const cards = [
 ];
 
 let openCards = [];
-let countMatches = 0;
+let matchCards = [];
 let countMoves = 0;
 let numberOfStars = 3;
 let totalSeconds = 0;
 let timer;
+let gameInitialized = false;
 
 /*
  * Display the cards on the page
@@ -45,12 +46,12 @@ function shuffle(array) {
  * If exists two cards that don't match, close cards.
  */
 function hideOldCards() {
-    if (openCards.length === 2) {
-        for (let i = 0; i < openCards.length; i++) {
+    if (openCards.length > 2) {
+        for (let i = 0; i < 2; i++) {
             let choosenCard = $(`#${openCards[i]}`)[0];
             $(choosenCard).removeClass('open show');
         }
-        openCards = [];
+        openCards.splice(0, 2);
     }
 }
 
@@ -58,32 +59,27 @@ function hideOldCards() {
  * Display the card's symbol
  */
 function showCard(evt) {
-    $(evt.target).addClass('open show');
+    $(evt).addClass('open show');
 }
 
 /**
  *  Add the card to a *list* of "open" cards and if the list already has another card, check to see if the two cards match.
  */
 function checkCardsMatch(evt) {
-    let indexOpenCard = openCards.indexOf(evt.target.id);
-    if (indexOpenCard > -1) {
-        $(evt.target).removeClass('open show');
-        openCards.splice(indexOpenCard);
-    } else if (openCards.length > 0) {
-        let firstChoosenCard = $(`#${openCards[0]}`)[0];
-        if (firstChoosenCard.firstChild.className === evt.target.firstChild.className) {
-            $(evt.target).addClass('match');
+    let indexOpenCard = openCards.indexOf(evt.id);
+    if (openCards.length > 1) {
+        let idOpenedCard = openCards[0];
+        let firstChoosenCard = $(`#${idOpenedCard}`)[0];
+        if (firstChoosenCard.firstChild.className === evt.firstChild.className) {
+            $(evt).addClass('match');
             $(firstChoosenCard).addClass('match');
             openCards = [];
-            countMatches += 2;
-            if (countMatches === cards.length) {
+            matchCards.push(idOpenedCard);
+            matchCards.push(evt.id);
+            if (matchCards.length === cards.length) {
                 this.showCongratulationsPopUp();
             }
-        } else {
-            openCards.push(evt.target.id);
         }
-    } else {
-        openCards.push(evt.target.id);
     }
 }
 
@@ -91,9 +87,20 @@ function checkCardsMatch(evt) {
  * Call behaviors when user choose a card.
  */
 function chooseCard(evt) {
-    this.updateMoves();
+    if (!gameInitialized) {
+        this.startTimer();
+    }
+
+    if (openCards.indexOf(evt.id) > -1 || matchCards.indexOf(evt.id) > -1) {
+        // Ignore
+        return;
+    }
+
+    openCards.push(evt.id);
 
     this.hideOldCards();
+
+    this.updateMoves();
 
     this.showCard(evt);
 
@@ -121,8 +128,10 @@ function showMoves() {
  * Increment the move counter.
  */
 function updateMoves() {
-    countMoves++;
-    this.showMoves();
+    if (openCards.length == 2) {
+        countMoves++;
+        this.showMoves();
+    }
 }
 
 /**
@@ -144,46 +153,42 @@ function updateStarRating() {
     }
 }
 
-function startGame() {
-    // Clear old rows and columns
-    $('#deck').children().each(function () {
-        this.remove();
-    });
-
+function startTimer() {
+    gameInitialized = true;
     startTime = new Date();
     timer = setInterval(function () {
         totalSeconds = Math.round((new Date - startTime) / 1000, 0);
         $('#timer').text(totalSeconds + " Seconds");
     }, 1000);
+}
 
-    countMoves = 0;
-    numberOfStars = 3;
+function startGame() {
     this.showMoves();
 
     this.shuffle(cards);
     // Create nested for to create rows and columns
     for (let i = 0; i < cards.length; i++) {
-        $('#deck').append(`<li id="card_${i}" class="card"><i class="fa ${cards[i].type}"></i></li>`);
+        $('#deck').append(`<li id="card_${i}" class="card" onclick="chooseCard(this)"><i class="fa ${cards[i].type}"></i></li>`);
     }
 
     $('#myModal')[0].style.display = "none";
 }
 
-/**
- * Set up restart icon.
- */
-$('.restart').click(function (evt) {
-    startGame();
-});
+function restartGame() {
+    gameInitialized = false;
 
-
-/**
- * Set up the event listener for a card.
- */
-function initListeners() {
-    $('#deck').on('click', '.card', function (evt) {
-        chooseCard(evt);
+    // Clear old rows and columns
+    $('#deck').children().each(function () {
+        this.remove();
     });
+
+    openCards = [];
+    matchCards = [];
+    countMoves = 0;
+    numberOfStars = 3;
+    timer = undefined;
+
+    this.startGame();
 }
 
 /**
@@ -210,5 +215,4 @@ function initCongratulationsPopup() {
 }
 
 startGame();
-initListeners();
 initCongratulationsPopup();
