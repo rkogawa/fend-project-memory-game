@@ -10,4 +10,4 @@ Your rating will be: 3 stars for less or equals than 20 moves; 2 stars for less 
 
 ## Game dependencies
 
-This game uses [jQuery](https://ajax.googleapis.com/ajax/libs/jquery), [Font Awesome](https://fontawesome.com/) and [Google Fonts](https://fonts.google.com/).
+This game uses [jQuery](https://jquery.com/), [Font Awesome](https://fontawesome.com/) and [Google Fonts](https://fonts.google.com/).
