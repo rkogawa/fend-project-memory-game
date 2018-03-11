@@ -168,7 +168,7 @@ function startGame() {
     this.shuffle(cards);
     // Create nested for to create rows and columns
     for (let i = 0; i < cards.length; i++) {
-        $('#deck').append(`<li id="card_${i}" class="card" onclick="chooseCard(this)"><i class="fa ${cards[i].type}"></i></li>`);
+        $('#deck').append(`<li id="card_${i}" class="card card-size" onclick="chooseCard(this)"><i class="fa ${cards[i].type}"></i></li>`);
     }
 
     $('#myModal')[0].style.display = "none";
